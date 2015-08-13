@@ -32,12 +32,18 @@ from __future__ import absolute_import
 import math
 import numpy as np
 import scipy.stats
+from scipy.sparse import issparse as _issparse
 import msmtools.util.types as types
 from six.moves import range
 
 __all__ = ['transition_matrix_metropolis_1d',
            'generate_traj',
            'generate_trajs']
+
+def _showSparseConversionWarning():
+    import warnings
+    warnings.warn('Converting input to dense, since method is '
+                  'currently only implemented for dense matrices.', UserWarning)
 
 
 class MarkovChainSampler(object):
@@ -175,6 +181,9 @@ def generate_traj(P, N, start=None, stop=None, dt=1):
         A discrete trajectory with length N/dt
 
     """
+    if _issparse(P):
+        _showSparseConversionWarning()
+        P = P.toarray()
     sampler = MarkovChainSampler(P, dt=dt)
     return sampler.trajectory(N, start=start, stop=stop)
 
@@ -206,6 +215,9 @@ def generate_trajs(P, M, N, start=None, stop=None, dt=1):
         A discrete trajectory with length N/dt
 
     """
+    if _issparse(P):
+        _showSparseConversionWarning()
+        P = P.toarray()
     sampler = MarkovChainSampler(P, dt=dt)
     return sampler.trajectories(M, N, start=start, stop=stop)
 
